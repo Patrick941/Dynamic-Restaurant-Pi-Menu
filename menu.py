@@ -1,8 +1,9 @@
 import tkinter as tk
-from PIL import Image, ImageTk
+from PIL import Image, ImageDraw, ImageTk
 from screeninfo import get_monitors
 import csv
 
+images = []
 menu = {}
 with open('menu.csv', mode='r') as file:
     reader = csv.reader(file)
@@ -13,45 +14,30 @@ with open('menu.csv', mode='r') as file:
         menu[item] = float(price)
 
 # Function to create a rounded rectangle
-def create_rounded_rectangle(canvas, colour, x1, y1, x2, y2, radius=25, **kwargs):
-    def name_to_rgb(name):
-        colours = {
-            'blue': (0, 0, 255),
-            'red': (255, 0, 0),
-            'green': (0, 255, 0),
-            'yellow': (255, 255, 0),
-            'orange': (255, 165, 0),
-            'lightblue': (173, 216, 230),
-            # Add more named colours as needed
-        }
-        return colours.get(name.lower(), (0, 0, 0))  # Default to black if colour name not found
-
-    rgb_colour = name_to_rgb(colour)
+def create_rounded_rectangle(root, canvas, colour, x1, y1, x2, y2, radius=25, transparency=0.5, **kwargs):
+    # Set up alpha transparency value
     alpha = int(transparency * 255)
-    rgb_colour_with_alpha = rgb_colour
-    points = [
-        x1 + radius, y1,
-        x1 + radius, y1,
-        x2 - radius, y1,
-        x2 - radius, y1,
-        x2, y1,
-        x2, y1 + radius,
-        x2, y1 + radius,
-        x2, y2 - radius,
-        x2, y2 - radius,
-        x2, y2,
-        x2 - radius, y2,
-        x2 - radius, y2,
-        x1 + radius, y2,
-        x1 + radius, y2,
-        x1, y2,
-        x1, y2 - radius,
-        x1, y2 - radius,
-        x1, y1 + radius,
-        x1, y1 + radius,
-        x1, y1,
-    ]
-    return canvas.create_polygon(points, fill=rgb_colour, **kwargs, smooth=True)
+    
+    # Define RGBA fill color
+    rgb_fill = root.winfo_rgb(colour)
+    rgba_fill = (rgb_fill[0] // 256, rgb_fill[1] // 256, rgb_fill[2] // 256, alpha)
+    
+    # Create a transparent image
+    width, height = x2 - x1, y2 - y1
+    image = Image.new('RGBA', (width, height), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    
+    # Draw rounded rectangle
+    draw.rounded_rectangle((0, 0, width, height), radius=radius, fill=rgba_fill)
+    
+    # Display on canvas
+    photo_image = ImageTk.PhotoImage(image)
+    canvas.create_image(x1, y1, image=photo_image, anchor='nw')
+    
+    # To keep a reference to avoid garbage collection
+    images.append(photo_image)
+    
+    return photo_image
 
 # Depth = 0 means not interacting
 # Depth = 1 means scrolling menu
@@ -59,7 +45,7 @@ def create_rounded_rectangle(canvas, colour, x1, y1, x2, y2, radius=25, **kwargs
 # Depth = 3 means editing price
 depth = 0
 
-transparency = 0.4
+transparency = 0.3
 
 # Function to open the application on a specific monitor
 def open_on_monitor(monitor_number=0):
@@ -108,8 +94,8 @@ def open_on_monitor(monitor_number=0):
     box_x = (screen_width - box_width) // 2
     box_y = (screen_height - box_height) // 2  # Centre the box vertically
     create_rounded_rectangle(
-        canvas, 'blue', box_x, box_y, box_x + box_width, box_y + box_height,
-        radius=20, outline='blue'
+        root, canvas, 'blue', box_x, box_y, box_x + box_width, box_y + box_height,
+        radius=20, outline=''
     )
 
     # Calculate maximum font size
@@ -153,8 +139,8 @@ def open_on_monitor(monitor_number=0):
             else:
                 bg_colour = 'lightblue'
             create_rounded_rectangle(
-                canvas, bg_colour, text_x, text_y, text_x + bounding_box_width, text_y + text_box_height,
-                radius=10, outline='blue'
+                root, canvas, bg_colour, text_x, text_y, text_x + bounding_box_width, text_y + text_box_height,
+                radius=10, outline=''
             )
 
             # Calculate the vertical centre position for the text
