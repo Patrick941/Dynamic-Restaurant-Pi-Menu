@@ -39,6 +39,18 @@ def create_rounded_rectangle(root, canvas, colour, x1, y1, x2, y2, radius=25, tr
     
     return photo_image
 
+# Function to create the background rectangle
+def create_background_rectangle(root, canvas, screen_width, screen_height):
+    box_width = int(screen_width * 0.8)
+    box_height = int(screen_height * 0.8)
+    box_x = (screen_width - box_width) // 2
+    box_y = (screen_height - box_height) // 2  # Centre the box vertically
+    create_rounded_rectangle(
+        root, canvas, 'blue', box_x, box_y, box_x + box_width, box_y + box_height,
+        radius=20, outline=''
+    )
+    return box_x, box_y, box_width, box_height
+
 # Depth = 0 means not interacting
 # Depth = 1 means scrolling menu
 # Depth = 2 means editing item name
@@ -54,7 +66,7 @@ def open_on_monitor(monitor_number=0):
 
     # Get monitor information
     monitors = get_monitors()
-    if monitor_number >= len(monitors):
+    if (monitor_number >= len(monitors)):
         print(f"Monitor {monitor_number} not available.")
         return
 
@@ -70,7 +82,7 @@ def open_on_monitor(monitor_number=0):
     image_aspect_ratio = image_width / image_height
 
     # Crop image to fit the screen aspect ratio
-    if image_aspect_ratio > screen_aspect_ratio:
+    if (image_aspect_ratio > screen_aspect_ratio):
         new_width = int(image_height * screen_aspect_ratio)
         offset = (image_width - new_width) // 2
         image = image.crop((offset, 0, offset + new_width, image_height))
@@ -89,14 +101,9 @@ def open_on_monitor(monitor_number=0):
     canvas.create_image(0, 0, anchor=tk.NW, image=photo)
 
     # Create the blue semi-transparent box
-    box_width = int(screen_width * 0.8)
-    box_height = int(screen_height * 0.8)
-    box_x = (screen_width - box_width) // 2
-    box_y = (screen_height - box_height) // 2  # Centre the box vertically
-    create_rounded_rectangle(
-        root, canvas, 'blue', box_x, box_y, box_x + box_width, box_y + box_height,
-        radius=20, outline=''
-    )
+    box_x, box_y, box_width, box_height = create_background_rectangle(root, canvas, screen_width, screen_height)
+    images.clear()
+    
 
     # Calculate maximum font size
     max_text_width = box_width - 20
@@ -123,6 +130,7 @@ def open_on_monitor(monitor_number=0):
 
     # Function to update the display
     def update_display():
+        create_background_rectangle(root, canvas, screen_width, screen_height)
         for i, (item, price) in enumerate(menu.items()):
             text_x = box_x + padding
             text_y = box_y + padding + i * (max_text_height // num_items)
@@ -131,10 +139,10 @@ def open_on_monitor(monitor_number=0):
             text_box_height = max_text_height // num_items - 5
 
             # Create a lighter background for each text box            
-            if i == selected_index:
+            if (i == selected_index):
                 if (depth == 1):
                     bg_colour = 'yellow'
-                elif (depth == 2):
+                elif (depth >= 2):
                     bg_colour = 'orange'
             else:
                 bg_colour = 'lightblue'
@@ -151,62 +159,62 @@ def open_on_monitor(monitor_number=0):
             text_y_centred = text_y + (text_box_height - text_height) // 2
 
             # Create the text item centred vertically
-            if depth != 2:
-                item_text = canvas.create_text(text_x + (2*padding), text_y_centred, anchor=tk.NW, text=item, font=font, fill='white')
+            if (depth != 2 or i != selected_index):
+                item_text = canvas.create_text(text_x + (2 * padding), text_y_centred, anchor=tk.NW, text=item, font=font, fill='white')
             else:
-                item_text = canvas.create_text(text_x + (2*padding), text_y_centred, anchor=tk.NW, text=item, font=font, fill='red')
-            if depth != 3:
-                price_text = canvas.create_text(text_x + (2*padding) + text_box_width, text_y_centred, anchor=tk.NW, text=f"€{price:.2f}", font=font, fill='white')
+                item_text = canvas.create_text(text_x + (2 * padding), text_y_centred, anchor=tk.NW, text=item, font=font, fill='red')
+            if (depth != 3 or i != selected_index):
+                price_text = canvas.create_text(text_x + (2 * padding) + text_box_width, text_y_centred, anchor=tk.NW, text=f"€{price:.2f}", font=font, fill='white')
             else:
-                price_text = canvas.create_text(text_x + (2*padding) + text_box_width, text_y_centred, anchor=tk.NW, text=f"€{price:.2f}", font=font, fill='red')
+                price_text = canvas.create_text(text_x + (2 * padding) + text_box_width, text_y_centred, anchor=tk.NW, text=f"€{price:.2f}", font=font, fill='red')
             text_items.append((item_text, price_text))
 
     # Function to handle key press events
     def on_key_press(event):
         nonlocal selected_index
+        global depth
+        
+        for item_text, price_text in text_items:
+            canvas.delete(item_text)
+            canvas.delete(price_text)
+        text_items.clear()
+        
+        # Clear the images list to remove references to the transparent boxes
+        images.clear()
+        print("Key pressed:", event.keysym)
         
         # Depth management
         if (depth == 0):
-            if event.keysym == 'Return':
+            if (event.keysym == 'Return'):
                 selected_index = 0
-            elif event.keysym == 'Escape':
+                depth = 1
+            elif (event.keysym == 'Escape'):
                 selected_index = -1
+                depth = 0
         elif (depth == 1):
-            if event.keysym == 'Return':
+            if (event.keysym == 'Return'):
                 depth = 2
-            elif event.keysym == 'Escape':
+            elif (event.keysym == 'Escape'):
                 depth = 0
                 selected_index = -1
         elif (depth == 2):
-            if event.keysym == 'Return':
+            if (event.keysym == 'Return'):
                 depth = 3
-            elif event.keysym == 'Escape':
+            elif (event.keysym == 'Escape'):
                 depth = 1
         elif (depth == 3):
-            if event.keysym == 'Return':
+            if (event.keysym == 'Return'):
                 depth = 1
-            elif event.keysym == 'Escape':
-                depth = 2
-        
-        
-        
-        
+            elif (event.keysym == 'Escape'):
+                depth = 2        
         elif (depth == 1):
-            if event.keysym == 'Up':
+            if (event.keysym == 'Up'):
                 selected_index = (selected_index - 1) % num_items
-            elif event.keysym == 'Down':
+            elif (event.keysym == 'Down'):
                 selected_index = (selected_index + 1) % num_items
-        canvas.delete('all')
-        canvas.create_image(0, 0, anchor=tk.NW, image=photo)
-        create_rounded_rectangle(
-            canvas, box_x, box_y, box_x + box_width, box_y + box_height,
-            radius=20, fill='blue', stipple='gray50', outline='blue'
-        )
         update_display()
 
-    # Bind the arrow keys to the on_key_press function
-    root.bind('<Up>', on_key_press)
-    root.bind('<Down>', on_key_press)
+    root.bind('<Key>', on_key_press)
 
     # Initial display update
     split = 0.8
