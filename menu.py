@@ -229,4 +229,4 @@ def open_on_monitor(monitor_number=0):
     root.attributes("-fullscreen", True)
     root.mainloop()
 
-open_on_monitor(monitor_number=2)
+open_on_monitor(monitor_number=0)
