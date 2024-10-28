@@ -40,6 +40,7 @@ def create_background_rectangle(root, canvas, screen_width, screen_height):
     return box_x, box_y, box_width, box_height
 
 depth = 0
+temp_price = None
 transparency = 0.3
 
 def open_on_monitor(monitor_number=0):
@@ -117,7 +118,10 @@ def open_on_monitor(monitor_number=0):
 
             text_y_centred = text_y + (text_box_height - font_size) // 2
             item_text = canvas.create_text(text_x + (2 * padding), text_y_centred, anchor=tk.NW, text=item_name, font=font, fill=name_text_color)
-            price_text = canvas.create_text(text_x + (2 * padding) + text_box_width, text_y_centred, anchor=tk.NW, text=f"€{price:.2f}", font=font, fill=price_text_color)
+            if depth != 3 or i != selected_index:
+                price_text = canvas.create_text(text_x + (2 * padding) + text_box_width, text_y_centred, anchor=tk.NW, text=f"€{price:.2f}", font=font, fill=price_text_color)
+            else:
+                price_text = canvas.create_text(text_x + (2 * padding) + text_box_width, text_y_centred, anchor=tk.NW, text=f"€{temp_price}", font=font, fill=price_text_color)
             text_items.append((item_text, price_text))
             
     def pop_item(selected_index):
@@ -127,7 +131,7 @@ def open_on_monitor(monitor_number=0):
 
     def on_key_press(event):
         nonlocal selected_index
-        global depth, num_items
+        global depth, num_items, temp_price
 
         for item_text, price_text in text_items:
             canvas.delete(item_text)
@@ -176,10 +180,33 @@ def open_on_monitor(monitor_number=0):
                 item = menu[selected_index]
                 item['name'] += event.char
         elif depth == 3:
-            if event.keysym == 'Return':
+            # Depth 3 - Edit item price
+            item = menu[selected_index]
+            if temp_price is None:  # Initialize temp price if first entry
+                temp_price = ""
+
+            # If a number is pressed, add it to temp_price
+            if event.char.isdigit():
+                if temp_price == "":
+                    item['price'] = 0  # Clear existing price on first entry
+                temp_price += event.char
+                item['price'] = float(temp_price)
+            
+            elif event.keysym == 'BackSpace' and temp_price:  # Handle backspace
+                temp_price = temp_price[:-1]
+                item['price'] = float(temp_price) if temp_price else 0.0
+
+            elif event.char == '.' and '.' not in temp_price:  # Add decimal point if not already present
+                temp_price += event.char
+
+            elif event.keysym == 'Return':  # Confirm price update
+                item['price'] = float(temp_price) if temp_price else 0.0
+                temp_price = None  # Reset temporary value
                 depth = 1
             elif event.keysym == 'Escape':
+                temp_price = None
                 depth = 2
+            
         update_display()
 
     root.bind('<Key>', on_key_press)
