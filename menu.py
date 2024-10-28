@@ -12,6 +12,12 @@ with open('menu.csv', mode='r') as file:
             continue
         item_name, price = row
         menu[index] = {'name': item_name, 'price': float(price)}
+        
+def write_to_csv():
+    with open('menu.csv', mode='w', newline='') as file:
+        writer = csv.writer(file)
+        for item in menu.values():
+            writer.writerow([item['name'], item['price']])
 
 # Function to create a rounded rectangle
 def create_rounded_rectangle(root, canvas, colour, x1, y1, x2, y2, radius=25, transparency=0.5, **kwargs):
@@ -168,8 +174,10 @@ def open_on_monitor(monitor_number=0):
         elif depth == 2:
             if event.keysym == 'Return':
                 depth = 3
+                write_to_csv()
             elif event.keysym == 'Escape':
                 depth = 1
+                write_to_csv()
             elif event.keysym == 'BackSpace' and selected_index >= 0:
                 item = menu[selected_index]
                 item['name'] = item['name'][:-1]
@@ -203,9 +211,11 @@ def open_on_monitor(monitor_number=0):
                 item['price'] = float(temp_price) if temp_price else 0.0
                 temp_price = None  # Reset temporary value
                 depth = 1
+                write_to_csv()
             elif event.keysym == 'Escape':
                 temp_price = None
                 depth = 2
+                write_to_csv()
             
         update_display()
 
