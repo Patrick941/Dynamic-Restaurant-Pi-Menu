@@ -212,6 +212,7 @@ def open_on_monitor(monitor_number=0):
             elif event.keysym == 'Escape':
                 temp_price = None
                 depth = 1
+                write_to_csv()
 
         update_display()
 
