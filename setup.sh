@@ -10,3 +10,4 @@ source menuVenv/bin/activate
 pip install pillow screeninfo
 sudo apt update
 sudo apt install python3-tk
+sudo apt-get install xdotool
