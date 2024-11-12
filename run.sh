@@ -5,8 +5,5 @@ cd /home/restaurant1
 git clone https://github.com/Patrick941/Dynamic-Restaurant-Pi-Menu piMenu
 cd piMenu
 
-git reset --hard HEAD
-git pull origin master
-
 menuVenv/bin/python piMenu/menu.py
 
