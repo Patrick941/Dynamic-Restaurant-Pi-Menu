@@ -54,7 +54,11 @@ def open_on_monitor(monitor_number=0):
     global num_items
     root = tk.Tk()
     root.title("Restaurant Menu")
+    root.after(100, lambda: root.focus_force())
     root.focus_force()
+    root.focus_set()
+    root.attributes("-topmost", True)
+    root.after(200, lambda: root.attributes("-topmost", False))
     monitors = get_monitors()
     if monitor_number >= len(monitors):
         print(f"Monitor {monitor_number} not available.")
