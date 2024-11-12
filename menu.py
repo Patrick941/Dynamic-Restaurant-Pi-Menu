@@ -51,7 +51,8 @@ transparency = 0.3
 def open_on_monitor(monitor_number=0):
     global num_items
     root = tk.Tk()
-    root.title("Image Display")
+    root.title("Restaurant Menu")
+    root.focus_force()
     monitors = get_monitors()
     if monitor_number >= len(monitors):
         print(f"Monitor {monitor_number} not available.")
