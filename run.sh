@@ -1,9 +1,8 @@
 #!/bin/bash
-rm -rf /home/restuarant1/piMenu
-cd /home/restaurant1
+cd /home/restaurant1/piMenu
 
-git clone https://github.com/Patrick941/Dynamic-Restaurant-Pi-Menu piMenu
-cd piMenu
+git reset --hard HEAD
+git pull origin master
 
 menuVenv/bin/python piMenu/menu.py
 
