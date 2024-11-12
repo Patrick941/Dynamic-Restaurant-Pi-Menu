@@ -5,5 +5,5 @@ git reset --hard HEAD
 git pull origin master
 
 source setup.sh
-menuVenv/bin/python piMenu/menu.py
+menuVenv/bin/python menu.py
 
