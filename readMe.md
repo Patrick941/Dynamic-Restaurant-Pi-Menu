@@ -12,3 +12,6 @@ Restart=always
 
 [Install]
 WantedBy=multi-user.target
+
+
+sudo systemctl enable menu.service
