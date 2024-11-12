@@ -13,4 +13,4 @@ fi
 menuVenv/bin/python menu.py
 
 sleep 1
-xdotool search --name "Image Display" windowactivate
+xdotool search --name "Restaurant Menu" windowactivate
