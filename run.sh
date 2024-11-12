@@ -1,5 +1,9 @@
 #!/bin/bash
-cd /home/restaurant1/piMenu
+rm -rf /home/restuarant1/piMenu
+cd /home/restaurant1
+
+git clone https://github.com/Patrick941/Dynamic-Restaurant-Pi-Menu piMenu
+cd piMenu
 
 git reset --hard HEAD
 git pull origin master
