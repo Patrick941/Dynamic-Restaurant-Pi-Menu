@@ -10,7 +10,7 @@ else
   source setup.sh
 fi
 
-# menuVenv/bin/python menu.py
+menuVenv/bin/python menu.py
 
 sleep 1
 xdotool search --name "Restaurant Menu" windowactivate
