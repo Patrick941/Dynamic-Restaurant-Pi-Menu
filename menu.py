@@ -224,3 +224,6 @@ def open_on_monitor(monitor_number=0):
     root.bind("<KeyPress>", on_key_press)
     update_display()
     root.mainloop()
+
+
+open_on_monitor(monitor_number=0)
