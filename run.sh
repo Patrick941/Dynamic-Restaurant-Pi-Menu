@@ -11,3 +11,6 @@ else
 fi
 
 menuVenv/bin/python menu.py
+
+sleep 1
+xdotool search --name "Image Display" windowactivate
