@@ -2,8 +2,12 @@
 cd /home/restaurant1/piMenu
 
 git reset --hard HEAD
-git pull origin master
+output=$(git pull origin master)
 
-source setup.sh
+if [[ $output == *"Already up to date."* ]]; then
+  echo "No changes pulled from GitHub."
+else
+  source setup.sh
+fi
 menuVenv/bin/python menu.py
 
