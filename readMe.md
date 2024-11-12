@@ -4,6 +4,7 @@ sudo nano /etc/systemd/system/menu.service
 Description=Menu
 
 [Service]
+ExecStartPre=/bin/sleep 10
 ExecStart=/home/patrick/Documents/piMenu/run.sh
 User=patrick
 Environment=DISPLAY=:0
