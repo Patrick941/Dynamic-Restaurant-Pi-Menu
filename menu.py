@@ -169,7 +169,7 @@ def open_on_monitor(monitor_number=0):
             elif event.keysym == 'Escape':
                 selected_index = -1
                 depth = 0
-            elif event.keysym == '-':
+            elif event.keysym == 'minus':
                 exit()
         elif depth == 1:
             if event.keysym == 'Return':
