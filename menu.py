@@ -5,6 +5,7 @@ import csv
 
 images = []
 menu = {}
+
 with open('menu.csv', mode='r') as file:
     reader = csv.reader(file)
     for index, row in enumerate(reader):
@@ -12,14 +13,13 @@ with open('menu.csv', mode='r') as file:
             continue
         item_name, price = row
         menu[index] = {'name': item_name, 'price': float(price)}
-        
+
 def write_to_csv():
     with open('menu.csv', mode='w', newline='') as file:
         writer = csv.writer(file)
         for item in menu.values():
             writer.writerow([item['name'], item['price']])
 
-# Function to create a rounded rectangle
 def create_rounded_rectangle(root, canvas, colour, x1, y1, x2, y2, radius=25, transparency=0.5, **kwargs):
     alpha = int(transparency * 255)
     rgb_fill = root.winfo_rgb(colour)
@@ -33,7 +33,6 @@ def create_rounded_rectangle(root, canvas, colour, x1, y1, x2, y2, radius=25, tr
     images.append(photo_image)
     return photo_image
 
-# Function to create the background rectangle
 def create_background_rectangle(root, canvas, screen_width, screen_height):
     box_width = int(screen_width * 0.8)
     box_height = int(screen_height * 0.8)
@@ -211,29 +210,17 @@ def open_on_monitor(monitor_number=0):
                 write_to_csv()
             elif event.keysym == 'Escape':
                 temp_price = None
-                depth = 2
-                write_to_csv()
-            
+                depth = 1
+
         update_display()
 
-    root.bind('<Key>', on_key_press)
-
-    split = 0.8
     padding = 10
-    update_display()
+    split = 0.7
 
     root.geometry(f"{screen_width}x{screen_height}+{x_offset}+{y_offset}")
     root.attributes("-fullscreen", True)
-    root.mainloop()
+    root.overrideredirect(True)
 
-    root.bind('<Key>', on_key_press)
-
-    split = 0.8
-    padding = 10
+    root.bind("<KeyPress>", on_key_press)
     update_display()
-
-    root.geometry(f"{screen_width}x{screen_height}+{x_offset}+{y_offset}")
-    root.attributes("-fullscreen", True)
     root.mainloop()
-
-open_on_monitor(monitor_number=0)
