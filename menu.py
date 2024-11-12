@@ -2,6 +2,8 @@ import tkinter as tk
 from PIL import Image, ImageDraw, ImageTk
 from screeninfo import get_monitors
 import csv
+import os
+import re
 
 images = []
 menu = {}
@@ -62,8 +64,18 @@ def open_on_monitor(monitor_number=0):
     screen_width, screen_height = monitor.width, monitor.height
     x_offset, y_offset = monitor.x, monitor.y
     screen_aspect_ratio = screen_width / screen_height
+    # Find the number file
+    number_file = None
+    for file in os.listdir('.'):
+        if re.match(r'number\d+', file):
+            number_file = file
+            break
 
-    image_path = "background.jpg"
+    if number_file:
+        with open(number_file, 'r') as f:
+            number = f.read().strip()
+
+    image_path = f"background/{number}.jpg"
     image = Image.open(image_path)
     image_width, image_height = image.size
     image_aspect_ratio = image_width / image_height
