@@ -9,5 +9,5 @@ if [[ $output == *"Already up to date."* ]]; then
 else
   source setup.sh
 fi
-menuVenv/bin/python menu.py
 
+# menuVenv/bin/python menu.py
