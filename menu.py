@@ -75,7 +75,7 @@ def open_on_monitor(monitor_number=0):
         with open(number_file, 'r') as f:
             number = f.read().strip()
 
-    image_path = f"background/{number}.jpg"
+    image_path = f"background{number}.jpg"
     image = Image.open(image_path)
     image_width, image_height = image.size
     image_aspect_ratio = image_width / image_height
