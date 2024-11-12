@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /home/patricl/Documents/piMenu
+cd /home/restaurant1/piMenu
 
 menuVenv/bin/python piMenu/menu.py
 
