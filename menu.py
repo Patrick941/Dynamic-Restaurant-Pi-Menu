@@ -97,6 +97,54 @@ def open_on_monitor(monitor_number=0):
     selected_index = -1
     text_items = []
 
+    def open_on_monitor(monitor_number=0):
+    global num_items
+    root = tk.Tk()
+    root.title("Image Display")
+    monitors = get_monitors()
+    if monitor_number >= len(monitors):
+        print(f"Monitor {monitor_number} not available.")
+        return
+
+    monitor = monitors[monitor_number]
+    screen_width, screen_height = monitor.width, monitor.height
+    x_offset, y_offset = monitor.x, monitor.y
+    screen_aspect_ratio = screen_width / screen_height
+
+    image_path = "background.jpg"
+    image = Image.open(image_path)
+    image_width, image_height = image.size
+    image_aspect_ratio = image_width / image_height
+
+    if image_aspect_ratio > screen_aspect_ratio:
+        new_width = int(image_height * screen_aspect_ratio)
+        offset = (image_width - new_width) // 2
+        image = image.crop((offset, 0, offset + new_width, image_height))
+    else:
+        new_height = int(image_width / screen_aspect_ratio)
+        offset = (image_height - new_height) // 2
+        image = image.crop((0, offset, image_width, offset + new_height))
+
+    image = image.resize((screen_width, screen_height), Image.LANCZOS)
+    photo = ImageTk.PhotoImage(image)
+
+    canvas = tk.Canvas(root, width=screen_width, height=screen_height)
+    canvas.pack()
+    canvas.create_image(0, 0, anchor=tk.NW, image=photo)
+    box_x, box_y, box_width, box_height = create_background_rectangle(root, canvas, screen_width, screen_height)
+    images.clear()
+            
+    max_text_width = box_width - 20
+    max_text_height = box_height - 20
+    num_items = len(menu)
+    max_font_size = 50
+    font_size = min(max_text_height // num_items, max_text_width // max(len(item['name']) for item in menu.values()))
+    font_size = min(font_size, max_font_size)
+    font = ('Arial', font_size)
+
+    selected_index = -1
+    text_items = []
+
     def update_display():
         create_background_rectangle(root, canvas, screen_width, screen_height)
         for i, (index, item_data) in enumerate(menu.items()):
@@ -107,7 +155,6 @@ def open_on_monitor(monitor_number=0):
             text_box_width = box_width * split - (2 * padding)
             text_box_height = max_text_height // num_items - 5
 
-            # Highlight color for selected items based on depth
             if i == selected_index:
                 bg_colour = 'yellow' if depth == 1 else 'orange' if depth >= 2 else 'lightblue'
                 name_text_color = 'red' if depth == 2 else 'white'
@@ -188,28 +235,26 @@ def open_on_monitor(monitor_number=0):
                 item = menu[selected_index]
                 item['name'] += event.char
         elif depth == 3:
-            # Depth 3 - Edit item price
             item = menu[selected_index]
-            if temp_price is None:  # Initialize temp price if first entry
+            if temp_price is None:
                 temp_price = ""
 
-            # If a number is pressed, add it to temp_price
             if event.char.isdigit():
                 if temp_price == "":
-                    item['price'] = 0  # Clear existing price on first entry
+                    item['price'] = 0
                 temp_price += event.char
                 item['price'] = float(temp_price)
             
-            elif event.keysym == 'BackSpace' and temp_price:  # Handle backspace
+            elif event.keysym == 'BackSpace' and temp_price:
                 temp_price = temp_price[:-1]
                 item['price'] = float(temp_price) if temp_price else 0.0
 
-            elif event.char == '.' and '.' not in temp_price:  # Add decimal point if not already present
+            elif event.char == '.' and '.' not in temp_price:
                 temp_price += event.char
 
-            elif event.keysym == 'Return':  # Confirm price update
+            elif event.keysym == 'Return':
                 item['price'] = float(temp_price) if temp_price else 0.0
-                temp_price = None  # Reset temporary value
+                temp_price = None
                 depth = 1
                 write_to_csv()
             elif event.keysym == 'Escape':
@@ -218,6 +263,16 @@ def open_on_monitor(monitor_number=0):
                 write_to_csv()
             
         update_display()
+
+    root.bind('<Key>', on_key_press)
+
+    split = 0.8
+    padding = 10
+    update_display()
+
+    root.geometry(f"{screen_width}x{screen_height}+{x_offset}+{y_offset}")
+    root.attributes("-fullscreen", True)
+    root.mainloop()
 
     root.bind('<Key>', on_key_press)
 
