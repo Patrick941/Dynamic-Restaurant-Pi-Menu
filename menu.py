@@ -15,6 +15,28 @@ with open('menu.csv', mode='r') as file:
             continue
         item_name, price = row
         menu[index] = {'name': item_name, 'price': float(price)}
+        
+if os.path.exists('auto_complete.csv'):
+    with open('auto_complete.csv', 'r') as file:
+        auto_complete_data = file.read().splitlines()
+auto_complete_data = {}
+reader = csv.reader(file)
+for index, row in enumerate(reader):
+    if not row:  # Skip empty lines
+        continue
+    item_name, price = row
+    auto_complete_data[index] = {'name': item_name, 'price': float(price)}
+else:
+    auto_complete_data = []
+    if not os.path.exists('auto_complete.csv'):
+        with open('auto_complete.csv', 'w') as file:
+            file.write('')
+            if not os.path.exists('menu.csv'):
+                with open('menu.csv', 'w', newline='') as file:
+                    writer = csv.writer(file)
+                    for item in menu.values():
+                        writer.writerow([item['name'], item['price']])
+                    auto_complete_data = [item['name'] for item in menu.values()]
 
 def write_to_csv():
     with open('menu.csv', mode='w', newline='') as file:
@@ -106,11 +128,8 @@ def open_on_monitor(monitor_number=0):
     max_text_height = box_height - 20
     num_items = len(menu)
     max_font_size = 50
-    if num_items == 0:
-        font_size = max_font_size
-    else:
-        font_size = min(max_text_height // num_items, max_text_width // max(len(item['name']) for item in menu.values()))
-        font_size = min(font_size, max_font_size)
+    font_size = min(max_text_height // num_items, max_text_width // max(len(item['name']) for item in menu.values()))
+    font_size = min(font_size, max_font_size)
     font = ('Arial', font_size)
 
     selected_index = -1
@@ -204,9 +223,12 @@ def open_on_monitor(monitor_number=0):
             elif event.keysym == 'space' and selected_index >= 0:
                 item = menu[selected_index]
                 item['name'] += ' '
-            elif event.char.isalnum() and selected_index >= 0:
+            elif (event.char.isalnum() or event.char in "&") and selected_index >= 0:
                 item = menu[selected_index]
                 item['name'] += event.char
+            elif event.keysym == 'Tab' and selected_index >= 0:
+                item = menu[selected_index]
+                item['name'] += '\t'
         elif depth == 3:
             item = menu[selected_index]
             if temp_price is None:
