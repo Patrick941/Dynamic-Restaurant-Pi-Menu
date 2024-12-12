@@ -18,25 +18,22 @@ with open('menu.csv', mode='r') as file:
         
 if os.path.exists('auto_complete.csv'):
     with open('auto_complete.csv', 'r') as file:
-        auto_complete_data = file.read().splitlines()
-auto_complete_data = {}
-reader = csv.reader(file)
-for index, row in enumerate(reader):
-    if not row:  # Skip empty lines
-        continue
-    item_name, price = row
-    auto_complete_data[index] = {'name': item_name, 'price': float(price)}
+        reader = csv.reader(file)
+        auto_complete_data = {}
+        for index, row in enumerate(reader):
+            if not row:  # Skip empty lines
+                continue
+            item_name, price = row
+            auto_complete_data[index] = {'name': item_name, 'price': float(price)}
 else:
     auto_complete_data = []
-    if not os.path.exists('auto_complete.csv'):
-        with open('auto_complete.csv', 'w') as file:
-            file.write('')
-            if not os.path.exists('menu.csv'):
-                with open('menu.csv', 'w', newline='') as file:
-                    writer = csv.writer(file)
-                    for item in menu.values():
-                        writer.writerow([item['name'], item['price']])
-                    auto_complete_data = [item['name'] for item in menu.values()]
+    with open('auto_complete.csv', 'w') as file:
+        file.write('')
+    with open('menu.csv', 'w', newline='') as file:
+        writer = csv.writer(file)
+        for item in menu.values():
+            writer.writerow([item['name'], item['price']])
+        auto_complete_data = [item['name'] for item in menu.values()]
 
 def write_to_csv():
     with open('menu.csv', mode='w', newline='') as file:
