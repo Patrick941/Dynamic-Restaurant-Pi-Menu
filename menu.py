@@ -224,8 +224,10 @@ def open_on_monitor(monitor_number=0):
                 item = menu[selected_index]
                 item['name'] += event.char
             elif event.keysym == 'Tab' and selected_index >= 0:
-                item = menu[selected_index]
-                item['name'] += '\t'
+                item_name = item['name']
+                matches = [data['name'] for data in auto_complete_data.values() if data['name'].startswith(item_name)]
+                if matches:
+                    item['name'] = matches[0]
         elif depth == 3:
             item = menu[selected_index]
             if temp_price is None:
