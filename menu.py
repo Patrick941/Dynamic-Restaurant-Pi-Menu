@@ -125,7 +125,7 @@ def open_on_monitor(monitor_number=0):
     max_text_height = box_height - 20
     num_items = len(menu)
     max_font_size = 50
-    if num_items == 0:
+    if num_items != 0:
         font_size = min(max_text_height // num_items, max_text_width // max(len(item['name']) for item in menu.values()))
         font_size = min(font_size, max_font_size)
     else:
