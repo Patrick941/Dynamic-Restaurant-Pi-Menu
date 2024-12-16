@@ -68,6 +68,7 @@ def create_background_rectangle(root, canvas, screen_width, screen_height):
 depth = 0
 temp_price = None
 transparency = 0.3
+prediction = None
 
 def open_on_monitor(monitor_number=0):
     global num_items
@@ -167,6 +168,24 @@ def open_on_monitor(monitor_number=0):
             else:
                 price_text = canvas.create_text(text_x + (2 * padding) + text_box_width, text_y_centred, anchor=tk.NW, text=f"€{temp_price}", font=font, fill=price_text_color)
             text_items.append((item_text, price_text))
+
+            if depth == 2 and selected_index == i:
+                print("Showing predictive text")
+                item = menu[selected_index]
+                item_name = item['name']
+                prediction = [data for data in auto_complete_data.values() if data['name'].startswith(item_name)]
+                if prediction:
+                    pred_name = prediction[0]['name']
+                    pred_price = prediction[0]['price']
+                else:
+                    print("No prediction variable empty")
+                    continue
+                pred_text_y = text_y + ( 2* text_box_height) / 3
+                pred_text = canvas.create_text(
+                    text_x + (2 * padding), pred_text_y, anchor=tk.NW,
+                    text=f"{pred_name} €{pred_price:.2f}", font=font, fill='grey'
+                )
+                text_items.append((pred_text,'0'))
             
     def pop_item(selected_index):
         menu.pop(selected_index)
@@ -208,30 +227,39 @@ def open_on_monitor(monitor_number=0):
                 pop_item(selected_index)
                 num_items -= 1
                 selected_index = 0
+                write_to_csv()
             elif event.keysym == 'plus':
                 menu[len(menu)] = {'name': '', 'price': 0.0}
                 num_items += 1
         elif depth == 2:
+            item = menu[selected_index]
+            item_name = item['name']
+            prediction = [data for data in auto_complete_data.values() if data['name'].startswith(item_name)]
             if event.keysym == 'Return':
                 depth = 3
                 write_to_csv()
+                prediction = None
+                with open('auto_complete.csv', 'a', newline='') as file:
+                    writer = csv.writer(file)
+                    writer.writerow([item['name'], item['price']])
             elif event.keysym == 'Escape':
                 depth = 1
                 write_to_csv()
+                prediction = None
             elif event.keysym == 'BackSpace' and selected_index >= 0:
-                item = menu[selected_index]
                 item['name'] = item['name'][:-1]
             elif event.keysym == 'space' and selected_index >= 0:
-                item = menu[selected_index]
                 item['name'] += ' '
             elif (event.char.isalnum() or event.char in "&") and selected_index >= 0:
-                item = menu[selected_index]
                 item['name'] += event.char
             elif event.keysym == 'Tab' and selected_index >= 0:
-                item_name = item['name']
-                matches = [data['name'] for data in auto_complete_data.values() if data['name'].startswith(item_name)]
+                matches = [data for data in auto_complete_data.values() if data['name'].startswith(item_name)]
                 if matches:
-                    item['name'] = matches[0]
+                    item['name'] = matches[0]['name']
+                    item['price'] = matches[0]['price']
+                depth = 1
+                prediction = None
+                write_to_csv()
         elif depth == 3:
             item = menu[selected_index]
             if temp_price is None:
@@ -255,10 +283,38 @@ def open_on_monitor(monitor_number=0):
                 temp_price = None
                 depth = 1
                 write_to_csv()
+                exists = False
+                for index, data in auto_complete_data.items():
+                    if data['name'] == item['name']:
+                        auto_complete_data[index] = {'name': item['name'], 'price': item['price']}
+                        exists = True
+                        break
+
+                if not exists:
+                    auto_complete_data[len(auto_complete_data)] = {'name': item['name'], 'price': item['price']}
+
+                with open('auto_complete.csv', 'w', newline='') as file:
+                    writer = csv.writer(file)
+                    for data in auto_complete_data.values():
+                        writer.writerow([data['name'], data['price']])
             elif event.keysym == 'Escape':
                 temp_price = None
                 depth = 1
                 write_to_csv()
+                exists = False
+                for index, data in auto_complete_data.items():
+                    if data['name'] == item['name']:
+                        auto_complete_data[index] = {'name': item['name'], 'price': item['price']}
+                        exists = True
+                        break
+
+                if not exists:
+                    auto_complete_data[len(auto_complete_data)] = {'name': item['name'], 'price': item['price']}
+
+                with open('auto_complete.csv', 'w', newline='') as file:
+                    writer = csv.writer(file)
+                    for data in auto_complete_data.values():
+                        writer.writerow([data['name'], data['price']])
 
         update_display()
 
@@ -266,8 +322,8 @@ def open_on_monitor(monitor_number=0):
     split = 0.7
 
     root.geometry(f"{screen_width}x{screen_height}+{x_offset}+{y_offset}")
-    root.attributes("-fullscreen", True)
-    root.overrideredirect(True)
+    # root.attributes("-fullscreen", True)
+    # root.overrideredirect(True)
 
     root.bind("<KeyPress>", on_key_press)
     update_display()
