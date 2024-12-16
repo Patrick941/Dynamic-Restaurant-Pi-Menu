@@ -322,8 +322,8 @@ def open_on_monitor(monitor_number=0):
     split = 0.7
 
     root.geometry(f"{screen_width}x{screen_height}+{x_offset}+{y_offset}")
-    # root.attributes("-fullscreen", True)
-    # root.overrideredirect(True)
+    root.attributes("-fullscreen", True)
+    root.overrideredirect(True)
 
     root.bind("<KeyPress>", on_key_press)
     update_display()
